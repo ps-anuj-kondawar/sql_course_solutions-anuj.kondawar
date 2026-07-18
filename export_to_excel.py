@@ -12,7 +12,7 @@ def export_queries():
     conn.autocommit = True
     cur = conn.cursor()
     
-    any_failed = False
+    failed_queries = []
     
     excel_path = "sql_exercise_outputs.xlsx"
     with pd.ExcelWriter(excel_path, engine='openpyxl') as writer:
@@ -44,13 +44,15 @@ def export_queries():
                         df.to_excel(writer, sheet_name=f"Q{i}", index=False)
                 except Exception as e:
                     print(f"Error executing statement in Q{i}: {e}")
-                    any_failed = True
+                    failed_queries.append((i, e))
                     
     cur.close()
     conn.close()
     
-    if any_failed:
-        print(f"Export completed with errors. Some queries failed.")
+    if failed_queries:
+        print(f"\nExport completed with errors. The following queries failed:")
+        for q, err in failed_queries:
+            print(f"  - Q{q}: {err}")
     else:
         print(f"Successfully exported all queries to {excel_path}")
 
